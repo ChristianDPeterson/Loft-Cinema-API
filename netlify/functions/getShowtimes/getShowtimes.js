@@ -9,21 +9,61 @@ const getShowtimes = async (url) => {
 	const $ = cheerio.load(data);
 	const cinema = $(".fav-h1 h1").text().trim();
 	const showtimes = [];
-	$(".movielist .movie-info-box").each((i, el) => {
-		const movie = removeLastWord(
-			$(el).find(".media-heading a").attr("title")
-		);
-		const times = parseTimes($(el).find(".buttonticket").text());
+	await Promise.all(
+		$(".movielist .movie-info-box").map(async (i, el) => {
+			let movie = $(el)
+				.find(".media-heading a")
+				.attr("title")
+				?.replace(" info", "");
 
-		times.map((time) => {
-			showtimes.push({ cinema, movie, time });
-		});
-	});
+			if (!movie) {
+				movie = "No movie title found";
+			}
+
+			const movieDetails = await queryMovie(movie);
+			const runtime = movieDetails?.runtime ? movieDetails.runtime : 120;
+			const description = movieDetails?.overview
+				? movieDetails.overview
+				: "No description found";
+
+			const times = parseTimes($(el).find(".buttonticket").text());
+
+			times.map((time) => {
+				const showtime = { cinema, movie, time, runtime, description };
+				// console.log(showtime);
+				showtimes.push(showtime);
+			});
+		})
+	);
+	console.log(showtimes);
 	return showtimes;
 };
 
-const removeLastWord = (str) => {
-	return str?.substring(0, str.lastIndexOf(" "));
+const queryMovie = async (title) => {
+	// change into query string
+	const queryString = title?.split(" ").join("+").toLowerCase();
+
+	// get movieId from themoviedb
+	const { data: movieQuery } = await axios.get(
+		`https://api.themoviedb.org/3/search/movie?api_key=${process.env.TMDB_API_KEY}&language=en-US&query=${queryString}&page=1`
+	);
+
+	if (!movieQuery || !movieQuery.results || movieQuery.results.length === 0) {
+		return null;
+	}
+
+	const id = movieQuery.results[0].id;
+
+	// get details on movie
+	const { data: movieDetail } = await axios.get(
+		`https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}&language=en-US`
+	);
+
+	if (!movieDetail) {
+		return null;
+	}
+
+	return movieDetail;
 };
 
 const parseTimes = (timeString) => {
