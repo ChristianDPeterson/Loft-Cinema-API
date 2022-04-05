@@ -1,6 +1,7 @@
 {
   "name": "loft-cinema-api",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,5 +16,11 @@
     "url": "https://github.com/ChristianUA/Loft-Cinema-API/issues"
   },
   "homepage": "https://github.com/ChristianUA/Loft-Cinema-API#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cheerio": "^1.0.0-rc.10",
+    "dayjs": "^1.11.0",
+    "tesseract.js": "^2.1.5"
+  }
 }
