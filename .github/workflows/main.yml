@@ -22,4 +22,4 @@ jobs:
     steps:
       # Runs a single command using the runners shell
       - name: Run a one-line script
-        run: curl -X POST -d '{}' https://api.netlify.com/build_hooks/5c23354f454e1350f8543e78
+        run: curl -X POST -d '{}' https://api.netlify.com/build_hooks/624d16bda9bf6360f1d2d641
