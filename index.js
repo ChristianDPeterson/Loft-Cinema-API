@@ -1,7 +1,13 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const dayjs = require("dayjs");
-const customParseFormat = require("dayjs/plugin/customParseFormat");
+import "dotenv/config";
+import axios from "axios";
+import cheerio from "cheerio";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
+
+import ics from "ics";
+import path from "path";
+import { writeFileSync } from "fs";
+
 dayjs.extend(customParseFormat);
 
 const getShowtimes = async (url) => {
@@ -92,12 +98,38 @@ const parseTimes = (timeString) => {
 	return showtimes;
 };
 
-exports.handler = async (event) => {
-	const showtimes = await getShowtimes(
-		"https://www.showtimes.com/movie-theaters/loft-cinema-12077/?date=all"
-	);
+export const handler = async (event, context) => {
+	// const showtimes = await getShowtimes(
+	// 	"https://www.showtimes.com/movie-theaters/loft-cinema-12077/?date=all"
+	// );
+
 	return {
 		statusCode: 200,
 		body: JSON.stringify({ showtimes: showtimes }),
 	};
 };
+
+// for local development
+// const showtimes = await getShowtimes(
+// 	"https://www.showtimes.com/movie-theaters/loft-cinema-12077/?date=all"
+// );
+// console.log(showtimes);
+
+ics.createEvent(
+	{
+		title: "Dinner",
+		description: "Nightly thing I do",
+		busyStatus: "FREE",
+		start: [2018, 1, 15, 6, 30],
+		duration: { minutes: 50 },
+	},
+	(error, value) => {
+		if (error) {
+			console.log(error);
+		}
+
+		console.log(value);
+
+		writeFileSync("event.ics", value);
+	}
+);
