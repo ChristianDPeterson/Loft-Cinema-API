@@ -4,7 +4,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -12,9 +13,6 @@
   },
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ChristianUA/Loft-Cinema-API/issues"
-  },
   "homepage": "https://github.com/ChristianUA/Loft-Cinema-API#readme",
   "description": "",
   "dependencies": {
