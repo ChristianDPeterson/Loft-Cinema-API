@@ -126,7 +126,6 @@ async function main() {
 		"https://www.showtimes.com/movie-theaters/loft-cinema-12077/?date=all"
 	);
 	const events = generateEvents(showtimes);
-	console.log(events);
 	ics.createEvents(events, (error, value) => {
 		if (error) {
 			console.log(error);
