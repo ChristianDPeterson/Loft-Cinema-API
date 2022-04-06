@@ -36,12 +36,10 @@ const getShowtimes = async (url) => {
 
 			times.map((time) => {
 				const showtime = { cinema, movie, time, runtime, description };
-				// console.log(showtime);
 				showtimes.push(showtime);
 			});
 		})
 	);
-	console.log(showtimes);
 	return showtimes;
 };
 
@@ -98,38 +96,43 @@ const parseTimes = (timeString) => {
 	return showtimes;
 };
 
-export const handler = async (event, context) => {
-	// const showtimes = await getShowtimes(
-	// 	"https://www.showtimes.com/movie-theaters/loft-cinema-12077/?date=all"
-	// );
+const generateEvents = (showtimes) => {
+	const events = [];
+	showtimes.forEach((showtime) => {
+		const startTime = [
+			showtime.time.getFullYear(),
+			showtime.time.getMonth() + 1,
+			showtime.time.getDate(),
+			showtime.time.getHours(),
+			showtime.time.getMinutes(),
+		];
 
-	return {
-		statusCode: 200,
-		body: JSON.stringify({ showtimes: showtimes }),
-	};
+		events.push({
+			calName: "Loft Cinema",
+			title: showtime.movie,
+			description: showtime.description,
+			start: startTime,
+			duration: {
+				hours: Math.floor(showtime.runtime / 60),
+				minutes: showtime.runtime % 60,
+			},
+		});
+	});
+	return events;
 };
 
-// for local development
-// const showtimes = await getShowtimes(
-// 	"https://www.showtimes.com/movie-theaters/loft-cinema-12077/?date=all"
-// );
-// console.log(showtimes);
-
-ics.createEvent(
-	{
-		title: "Dinner",
-		description: "Nightly thing I do",
-		busyStatus: "FREE",
-		start: [2022, 4, 6, 18, 30],
-		duration: { minutes: 30 },
-	},
-	(error, value) => {
+async function main() {
+	const showtimes = await getShowtimes(
+		"https://www.showtimes.com/movie-theaters/loft-cinema-12077/?date=all"
+	);
+	const events = generateEvents(showtimes);
+	console.log(events);
+	ics.createEvents(events, (error, value) => {
 		if (error) {
 			console.log(error);
 		}
-
-		console.log(value);
-
 		writeFileSync("event.ics", value);
-	}
-);
+	});
+}
+
+await main();
