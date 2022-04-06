@@ -120,7 +120,7 @@ ics.createEvent(
 		title: "Dinner",
 		description: "Nightly thing I do",
 		busyStatus: "FREE",
-		start: [2022, 4, 6, 6, 30],
+		start: [2022, 4, 6, 7, 30],
 		duration: { minutes: 30 },
 	},
 	(error, value) => {
