@@ -3,12 +3,13 @@ import axios from "axios";
 import cheerio from "cheerio";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
+import utc from "dayjs/plugin/utc.js";
 
 import ics from "ics";
-import path from "path";
 import { writeFileSync } from "fs";
 
 dayjs.extend(customParseFormat);
+dayjs.extend(utc);
 
 const getShowtimes = async (url) => {
 	const { data } = await axios.get(url);
@@ -88,7 +89,9 @@ const parseTimes = (timeString) => {
 			.filter(Boolean)
 			.map((time) => {
 				const dateString = `${month} ${day} ${time}`;
-				const dateObject = dayjs(dateString, "MMM D hh:mma").toDate();
+				const dateObject = dayjs(dateString, "MMM D hh:mma")
+					.utc()
+					.toDate();
 				showtimes.push(dateObject);
 			});
 	});
@@ -112,6 +115,7 @@ const generateEvents = (showtimes) => {
 			title: showtime.movie,
 			description: showtime.description,
 			start: startTime,
+			startInputType: "utc",
 			duration: {
 				hours: Math.floor(showtime.runtime / 60),
 				minutes: showtime.runtime % 60,
