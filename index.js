@@ -92,7 +92,10 @@ const parseTimes = (timeString) => {
 			.map((time) => {
 				const dateString = `${month} ${day} ${time}`;
 				console.log(dateString);
-				const dateObject = dayjs(dateString, "MMM D hh:mma");
+				const dateObject = dayjs(dateString, "MMM D hh:mma").add(
+					4,
+					"h"
+				);
 				// .tz("America/Phoenix")
 				// .utc();
 				console.log(dateObject);
