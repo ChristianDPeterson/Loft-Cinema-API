@@ -93,7 +93,7 @@ const parseTimes = (timeString) => {
 				const dateString = `${month} ${day} ${time}`;
 				console.log(dateString);
 				const dateObject = dayjs(dateString, "MMM D hh:mma").add(
-					4,
+					7,
 					"h"
 				);
 				// .tz("America/Phoenix")
