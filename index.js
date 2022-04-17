@@ -26,7 +26,7 @@ const getShowtimes = async (url) => {
 				?.replace(" info", "");
 
 			if (!movie) {
-				movie = "No movie title found";
+				movie = $(el).find(".media-heading").text().trim();
 			}
 
 			const movieDetails = await queryMovie(movie);
@@ -91,17 +91,9 @@ const parseTimes = (timeString) => {
 			.filter(Boolean) // remove empty strings
 			.map((time) => {
 				const dateString = `${month} ${day} ${time}`;
-				console.log(dateString);
 				const dateObject = dayjs
 					.utc(dateString, "MMM D hh:mma")
 					.utcOffset(7);
-				// .add(
-				// 	7,
-				// 	"h"
-				// );
-				// .tz("America/Phoenix")
-				// .utc();
-				console.log(dateObject);
 				return dateObject;
 			});
 
@@ -127,7 +119,6 @@ const generateEvents = (showtimes) => {
 			title: showtime.movie,
 			description: showtime.description,
 			start: startTime,
-			// startInputType: showtime.time.isUTC() ? "utc" : "local",
 			duration: {
 				hours: Math.floor(showtime.runtime / 60),
 				minutes: showtime.runtime % 60,
