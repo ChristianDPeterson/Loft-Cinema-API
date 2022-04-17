@@ -1,53 +1,45 @@
 import "dotenv/config";
+import { writeFileSync } from "fs";
+
 import axios from "axios";
 import cheerio from "cheerio";
+import ics from "ics";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import utc from "dayjs/plugin/utc.js";
-// import tz from "dayjs/plugin/timezone.js";
-
-import ics from "ics";
-import { writeFileSync } from "fs";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
-// dayjs.extend(tz);
 
-const getShowtimes = async (url) => {
+async function getShowtimes(url) {
 	const { data } = await axios.get(url);
 	const $ = cheerio.load(data);
-	const cinema = $(".fav-h1 h1").text().trim();
-	const showtimes = [];
-	await Promise.all(
-		$(".movielist .movie-info-box").map(async (i, el) => {
-			let movie = $(el)
-				.find(".media-heading a")
-				.attr("title")
-				?.replace(" info", "");
 
-			if (!movie) {
-				movie = $(el).find(".media-heading").text().trim();
-			}
+	const showtimeHTMLElements = Array.from($(".movielist .movie-info-box"));
+	const allShowtimes = await showtimeHTMLElements.reduce(async (prev, el) => {
+		const cinema = $(".fav-h1 h1").text().trim();
+		const movieElement = $(el).find(".media-heading a").attr("title");
+		const movie = movieElement
+			? movieElement.replace(" info", "")
+			: $(el).find(".media-heading").text().trim();
 
-			const movieDetails = await queryMovie(movie);
-			const runtime = movieDetails?.runtime ? movieDetails.runtime : 120;
-			const description = movieDetails?.overview
-				? movieDetails.overview
-				: "No description found";
+		const movieDetails = await queryMovie(movie);
+		const runtime = movieDetails?.runtime ?? 120;
+		const description = movieDetails?.overview ?? "No description found";
 
-			const timeString = $(el).find(".buttonticket").text();
-			const times = parseTimes(timeString);
+		const timeString = $(el).find(".buttonticket").text();
+		const showtimes = parseTimes(timeString).map((time) => {
+			return { cinema, movie, time, runtime, description };
+		});
 
-			times.map((time) => {
-				const showtime = { cinema, movie, time, runtime, description };
-				showtimes.push(showtime);
-			});
-		})
-	);
-	return showtimes;
-};
+		return [...(await prev), ...showtimes];
+	}, []);
 
-const queryMovie = async (title) => {
+	console.log(allShowtimes);
+	return allShowtimes;
+}
+
+async function queryMovie(title) {
 	// change into query string
 	const queryString = title?.split(" ").join("+").toLowerCase();
 
@@ -67,21 +59,15 @@ const queryMovie = async (title) => {
 		`https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}&language=en-US`
 	);
 
-	if (!movieDetail) {
-		return null;
-	}
+	return movieDetail ? movieDetail : null;
+}
 
-	return movieDetail;
-};
-
-const parseTimes = (timeString) => {
-	let showtimes = [];
-
+function parseTimes(timeString) {
 	const dates = timeString
 		.split(/Sun, |Mon, |Tue, |Wed, |Thu, |Fri, |Sat, /)
 		.filter(Boolean); // remove empty strings
 
-	dates.forEach((date) => {
+	const showtimes = dates.reduce((prev, date) => {
 		const month = date.substring(0, date.indexOf(" "));
 		const day = date.substring(date.indexOf(" ") + 1, date.indexOf(":"));
 		const timeList = date.substring(date.indexOf(":") + 1);
@@ -97,15 +83,14 @@ const parseTimes = (timeString) => {
 				return dateObject;
 			});
 
-		showtimes = [...showtimes, ...times];
-	});
+		return [...prev, ...times];
+	}, []);
 
 	return showtimes;
-};
+}
 
-const generateEvents = (showtimes) => {
-	const events = [];
-	showtimes.forEach((showtime) => {
+function generateEvents(showtimes) {
+	return showtimes.map((showtime) => {
 		const startTime = [
 			showtime.time.year(),
 			showtime.time.month() + 1,
@@ -114,7 +99,7 @@ const generateEvents = (showtimes) => {
 			showtime.time.minute(),
 		];
 
-		events.push({
+		return {
 			calName: "Loft Cinema",
 			title: showtime.movie,
 			description: showtime.description,
@@ -123,10 +108,9 @@ const generateEvents = (showtimes) => {
 				hours: Math.floor(showtime.runtime / 60),
 				minutes: showtime.runtime % 60,
 			},
-		});
+		};
 	});
-	return events;
-};
+}
 
 async function main() {
 	const showtimes = await getShowtimes(
