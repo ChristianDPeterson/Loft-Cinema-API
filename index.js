@@ -40,8 +40,6 @@ const getShowtimes = async (url) => {
 
 			times.map((time) => {
 				const showtime = { cinema, movie, time, runtime, description };
-				console.log(showtime);
-
 				showtimes.push(showtime);
 			});
 		})
@@ -93,11 +91,9 @@ const parseTimes = (timeString) => {
 			.filter(Boolean) // remove empty strings
 			.map((time) => {
 				const dateString = `${month} ${day} ${time}`;
-				console.log(dateString);
 				const dateObject = dayjs(dateString, "MMM D hh:mma")
-					// .tz("America/Phoenix")
+					.tz("America/Phoenix")
 					.utc();
-				console.log(dateObject);
 				return dateObject;
 			});
 
