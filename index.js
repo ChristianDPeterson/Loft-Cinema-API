@@ -3,14 +3,14 @@ import axios from "axios";
 import cheerio from "cheerio";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
-// import utc from "dayjs/plugin/utc.js";
+import utc from "dayjs/plugin/utc.js";
 // import tz from "dayjs/plugin/timezone.js";
 
 import ics from "ics";
 import { writeFileSync } from "fs";
 
 dayjs.extend(customParseFormat);
-// dayjs.extend(utc);
+dayjs.extend(utc);
 // dayjs.extend(tz);
 
 const getShowtimes = async (url) => {
@@ -92,10 +92,13 @@ const parseTimes = (timeString) => {
 			.map((time) => {
 				const dateString = `${month} ${day} ${time}`;
 				console.log(dateString);
-				const dateObject = dayjs(dateString, "MMM D hh:mma").add(
-					7,
-					"h"
-				);
+				const dateObject = dayjs
+					.utc(dateString, "MMM D hh:mma")
+					.utcOffset(7);
+				// .add(
+				// 	7,
+				// 	"h"
+				// );
 				// .tz("America/Phoenix")
 				// .utc();
 				console.log(dateObject);
