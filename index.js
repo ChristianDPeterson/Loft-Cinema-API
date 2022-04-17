@@ -4,12 +4,14 @@ import cheerio from "cheerio";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import utc from "dayjs/plugin/utc.js";
+import tz from "dayjs/plugin/timezone.js";
 
 import ics from "ics";
 import { writeFileSync } from "fs";
 
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
+dayjs.extend(tz);
 
 const getShowtimes = async (url) => {
 	const { data } = await axios.get(url);
@@ -33,10 +35,13 @@ const getShowtimes = async (url) => {
 				? movieDetails.overview
 				: "No description found";
 
-			const times = parseTimes($(el).find(".buttonticket").text());
+			const timeString = $(el).find(".buttonticket").text();
+			const times = parseTimes(timeString);
 
 			times.map((time) => {
 				const showtime = { cinema, movie, time, runtime, description };
+				console.log(showtime);
+
 				showtimes.push(showtime);
 			});
 		})
@@ -72,28 +77,31 @@ const queryMovie = async (title) => {
 };
 
 const parseTimes = (timeString) => {
-	const showtimes = [];
+	let showtimes = [];
 
 	const dates = timeString
 		.split(/Sun, |Mon, |Tue, |Wed, |Thu, |Fri, |Sat, /)
 		.filter(Boolean); // remove empty strings
 
-	dates.map((date) => {
+	dates.forEach((date) => {
 		const month = date.substring(0, date.indexOf(" "));
 		const day = date.substring(date.indexOf(" ") + 1, date.indexOf(":"));
 		const timeList = date.substring(date.indexOf(":") + 1);
 
-		// split the list of times into seperate strings
 		const times = timeList
-			.split(/(?<=m)/)
-			.filter(Boolean)
+			.split(/(?<=m)/) // split on "m" from "am" or "pm"
+			.filter(Boolean) // remove empty strings
 			.map((time) => {
 				const dateString = `${month} ${day} ${time}`;
+				console.log(dateString);
 				const dateObject = dayjs(dateString, "MMM D hh:mma")
-					.utc()
-					.toDate();
-				showtimes.push(dateObject);
+					// .tz("America/Phoenix")
+					.utc();
+				console.log(dateObject);
+				return dateObject;
 			});
+
+		showtimes = [...showtimes, ...times];
 	});
 
 	return showtimes;
@@ -103,11 +111,11 @@ const generateEvents = (showtimes) => {
 	const events = [];
 	showtimes.forEach((showtime) => {
 		const startTime = [
-			showtime.time.getFullYear(),
-			showtime.time.getMonth() + 1,
-			showtime.time.getDate(),
-			showtime.time.getHours(),
-			showtime.time.getMinutes(),
+			showtime.time.year(),
+			showtime.time.month() + 1,
+			showtime.time.date(),
+			showtime.time.hour(),
+			showtime.time.minute(),
 		];
 
 		events.push({
@@ -115,7 +123,7 @@ const generateEvents = (showtimes) => {
 			title: showtime.movie,
 			description: showtime.description,
 			start: startTime,
-			startInputType: "utc",
+			startInputType: showtime.time.isUTC() ? "utc" : "local",
 			duration: {
 				hours: Math.floor(showtime.runtime / 60),
 				minutes: showtime.runtime % 60,
