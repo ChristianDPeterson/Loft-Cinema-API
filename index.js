@@ -12,7 +12,7 @@ dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 
 async function getShowtimes(url) {
-	const { data } = await axios.get(url);
+	const { data } = await axios.get(encodeURI(url));
 	const $ = cheerio.load(data);
 
 	const showtimeHTMLElements = Array.from($(".movielist .movie-info-box"));
@@ -45,7 +45,9 @@ async function queryMovie(title) {
 
 	// get movieId from themoviedb
 	const { data: movieQuery } = await axios.get(
-		`https://api.themoviedb.org/3/search/movie?api_key=${process.env.TMDB_API_KEY}&language=en-US&query=${queryString}&page=1`
+		encodeURI(
+			`https://api.themoviedb.org/3/search/movie?api_key=${process.env.TMDB_API_KEY}&language=en-US&query=${queryString}&page=1`
+		)
 	);
 
 	if (!movieQuery || !movieQuery.results || movieQuery.results.length === 0) {
@@ -56,7 +58,9 @@ async function queryMovie(title) {
 
 	// get details on movie
 	const { data: movieDetail } = await axios.get(
-		`https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}&language=en-US`
+		encodeURI(
+			`https://api.themoviedb.org/3/movie/${id}?api_key=${process.env.TMDB_API_KEY}&language=en-US`
+		)
 	);
 
 	return movieDetail ? movieDetail : null;
