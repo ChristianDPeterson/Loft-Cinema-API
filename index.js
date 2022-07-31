@@ -95,7 +95,7 @@ function generateEvents(movies) {
 			return {
 				calName: "Loft Cinema",
 				title: movie.title,
-				description: `${movie.url} \n ${movie.description}`,
+				description: `Get tickets: ${movie.url}\nDescription: ${movie.description}\nRuntime: ${movie.runtime} minutes`,
 				start: startTime,
 				url: movie.url,
 				geo: { lat: 32.236467, lon: -110.923583 },
