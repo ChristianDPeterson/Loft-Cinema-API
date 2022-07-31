@@ -134,3 +134,4 @@ dist
 
 # Ignore ics files
 event.ics
+.DS_Store
