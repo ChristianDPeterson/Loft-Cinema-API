@@ -95,7 +95,7 @@ function generateEvents(movies) {
 			return {
 				calName: "Loft Cinema",
 				title: movie.title,
-				description: movie.description,
+				description: `${movie.url} \n ${movie.description}`,
 				start: startTime,
 				url: movie.url,
 				geo: { lat: 32.236467, lon: -110.923583 },
@@ -112,6 +112,7 @@ function generateEvents(movies) {
 async function main() {
 	const showtimes = await getShowtimes("https://loftcinema.org/showtimes/");
 	const events = generateEvents(showtimes);
+	console.log(events);
 	ics.createEvents(events, (error, value) => {
 		if (error) {
 			console.log(error);
