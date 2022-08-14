@@ -18,10 +18,14 @@
   "dependencies": {
     "axios": "^0.26.1",
     "cheerio": "^1.0.0-rc.10",
+    "chrome-aws-lambda": "^10.1.0",
     "dayjs": "^1.11.0",
     "dotenv": "^16.0.0",
     "ics": "^2.35.0",
-    "puppeteer": "^16.1.0",
+    "puppeteer-core": "^10.4.0",
     "tesseract.js": "^2.1.5"
+  },
+  "devDependencies": {
+    "puppeteer": "^16.1.0"
   }
 }

@@ -3,7 +3,8 @@ import { writeFileSync } from "fs";
 
 import axios from "axios";
 import cheerio from "cheerio";
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
+import chromium from "chrome-aws-lambda";
 import ics from "ics";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
@@ -23,8 +24,7 @@ function toTitleCase(str) {
 }
 
 async function getShowtimes(url) {
-	// const { data } = await axios.get(encodeURI(url));
-	const browser = await puppeteer.launch({ headless: false });
+	const browser = await chromium.puppeteer.launch({ headless: true });
 	const page = await browser.newPage();
 	await page.goto(encodeURI(url), { waitUntil: "domcontentloaded" });
 	await page.waitForSelector(".date-showings", {
