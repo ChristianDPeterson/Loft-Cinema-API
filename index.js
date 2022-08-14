@@ -159,7 +159,6 @@ function formatEvents(movies) {
 async function main() {
 	const showtimes = await getShowtimes("https://loftcinema.org/showtimes/");
 	const events = formatEvents(showtimes);
-	console.log(events);
 	ics.createEvents(events, (error, value) => {
 		if (error) {
 			console.log(error);
