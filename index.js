@@ -3,6 +3,7 @@ import { writeFileSync } from "fs";
 
 import axios from "axios";
 import cheerio from "cheerio";
+import puppeteer from "puppeteer";
 import ics from "ics";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
@@ -11,8 +12,25 @@ import utc from "dayjs/plugin/utc.js";
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 
+function toTitleCase(str) {
+	return str
+		.toLowerCase()
+		.split(" ")
+		.map(function (word) {
+			return word.charAt(0).toUpperCase() + word.slice(1);
+		})
+		.join(" ");
+}
+
 async function getShowtimes(url) {
-	const { data } = await axios.get(encodeURI(url));
+	// const { data } = await axios.get(encodeURI(url));
+	const browser = await puppeteer.launch({ headless: false });
+	const page = await browser.newPage();
+	await page.goto(encodeURI(url), { waitUntil: "domcontentloaded" });
+	await page.waitForSelector(".date-showings", {
+		visible: true,
+	});
+	const data = await page.content();
 	const $ = cheerio.load(data);
 	const showtimeHTMLElements = Array.from($("h3 > a"));
 
@@ -26,7 +44,7 @@ async function getShowtimes(url) {
 
 	const times = await Promise.all(
 		showtimeLinks.map(async (showtime) => {
-			return await getInformation(showtime);
+			return await getInformation(showtime, browser);
 		})
 	);
 
@@ -34,11 +52,21 @@ async function getShowtimes(url) {
 		return time !== null;
 	});
 
+	await browser.close();
+
 	return filteredTimes;
 }
 
-async function getInformation(url) {
-	const { data } = await axios.get(encodeURI(url));
+async function getInformation(url, browser) {
+	const page = await browser.newPage();
+	await page.goto(encodeURI(url), { waitUntil: "domcontentloaded" });
+	await page
+		.waitForSelector(".date-collection-wrapper", {
+			visible: true,
+			timeout: 3000,
+		})
+		.catch((err) => {});
+	const data = await page.content();
 	const $ = cheerio.load(data);
 	const title = $(".image-header .container h1").text().trim();
 	const description = $(".film-content p").text().trim();
@@ -53,23 +81,32 @@ async function getInformation(url) {
 
 	const showtimeLink = $(".showtime-link").prop("href");
 	if (!showtimeLink) {
+		const timeString = $(".film-headlines > h3")
+			.text()
+			.trim()
+			.replace(" AT ", " ")
+			.replace(", ", " ")
+			.replace("TH ", " ")
+			.split(" ")
+			.slice(1)
+			.join(" ");
+		const titleCase = toTitleCase(timeString);
+		if (dayjs(titleCase, "MMMM D h:mma", true).isValid()) {
+			const showtime = dayjs.utc(titleCase, "MMMM D h:mma").utcOffset(7);
+			await page.close();
+			return {
+				title,
+				description,
+				runtime,
+				url,
+				showtimes: [showtime],
+			};
+		}
+		await page.close();
 		return null;
 	}
-	const showtimes = await parseTimes("https://loftcinema.org" + showtimeLink);
 
-	return {
-		title,
-		description,
-		runtime,
-		showtimes,
-		url,
-	};
-}
-
-async function parseTimes(url) {
-	const { data } = await axios.get(encodeURI(url));
-	const $ = cheerio.load(data);
-	const times = Array.from($(".date-collection > .selectable-date")).map(
+	const showtimes = Array.from($(".date-collection > .selectable-date")).map(
 		(time) => {
 			const timeString = $(time).attr("data-date").replace(" @ ", " ");
 			const dateObject = dayjs
@@ -79,10 +116,17 @@ async function parseTimes(url) {
 		}
 	);
 
-	return times;
+	await page.close();
+	return {
+		title,
+		description,
+		runtime,
+		showtimes,
+		url,
+	};
 }
 
-function generateEvents(movies) {
+function formatEvents(movies) {
 	return movies.reduce((acc, movie) => {
 		return [
 			...acc,
@@ -114,7 +158,7 @@ function generateEvents(movies) {
 
 async function main() {
 	const showtimes = await getShowtimes("https://loftcinema.org/showtimes/");
-	const events = generateEvents(showtimes);
+	const events = formatEvents(showtimes);
 	ics.createEvents(events, (error, value) => {
 		if (error) {
 			console.log(error);
