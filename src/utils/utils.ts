@@ -5,19 +5,23 @@ import { Browser } from "puppeteer-core";
 async function getPageContent(
 	browser: Browser,
 	url: string,
-	waitForSelector: string
+	waitForSelector?: string
 ): Promise<string> {
 	try {
 		// Create a new page (tab) in the browser
 		const page = await browser.newPage();
 
 		await page.goto(encodeURI(url), { waitUntil: "domcontentloaded" });
-		await page
-			.waitForSelector(waitForSelector, {
-				visible: true,
-				timeout: 3000,
-			})
-			.catch(() => {});
+
+		if (!!waitForSelector) {
+			await page
+				.waitForSelector(waitForSelector, {
+					visible: true,
+					timeout: 3000,
+				})
+				.catch(() => {});
+		}
+
 		const pageContents = await page.content();
 		await page.close();
 		return pageContents;

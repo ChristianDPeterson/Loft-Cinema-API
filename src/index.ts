@@ -10,7 +10,7 @@ async function main() {
 	const browser = await chromium.puppeteer.launch();
 	const events = await getEvents(browser);
 
-	console.log(events);
+	console.dir(events);
 
 	ics.createEvents(events, (error, value) => {
 		if (error) {
