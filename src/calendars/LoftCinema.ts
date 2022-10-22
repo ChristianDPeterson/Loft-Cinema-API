@@ -6,7 +6,6 @@ import {
 } from "../utils/utils.js";
 
 import type { EventAttributes } from "ics";
-import chromium from "chrome-aws-lambda";
 import cheerio from "cheerio";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
@@ -16,7 +15,9 @@ dayjs.extend(utc);
 
 import type { Browser } from "puppeteer-core";
 
-const getEvents = async (browser: Browser): Promise<EventAttributes[]> => {
+const getLoftCinemaEvents = async (
+	browser: Browser
+): Promise<EventAttributes[]> => {
 	return await getShowtimes("https://loftcinema.org/showtimes/", browser);
 };
 
@@ -83,7 +84,7 @@ async function getInformation(
 			events.push({
 				calName: calendarName,
 				title,
-				description,
+				description: `Get tickets: ${url}\nDescription: ${description}\nRuntime: ${runtime} minutes`,
 				url,
 				duration: getDuration(runtime),
 				start: getDateArray(showtime),
@@ -109,4 +110,4 @@ async function getInformation(
 	return events;
 }
 
-export default getEvents;
+export default getLoftCinemaEvents;

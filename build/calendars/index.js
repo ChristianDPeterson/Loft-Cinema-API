@@ -1,2 +1,2 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+import getLoftCinemaEvents from "./LoftCinema.js";
+export { getLoftCinemaEvents };

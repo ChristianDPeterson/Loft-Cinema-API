@@ -5,7 +5,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import utc from "dayjs/plugin/utc.js";
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
-const getEvents = async (browser) => {
+const getLoftCinemaEvents = async (browser) => {
     return await getShowtimes("https://loftcinema.org/showtimes/", browser);
 };
 async function getShowtimes(url, browser) {
@@ -51,7 +51,7 @@ async function getInformation(url, browser, calendarName) {
             events.push({
                 calName: calendarName,
                 title,
-                description,
+                description: `Get tickets: ${url}\nDescription: ${description}\nRuntime: ${runtime} minutes`,
                 url,
                 duration: getDuration(runtime),
                 start: getDateArray(showtime),
@@ -76,4 +76,4 @@ async function getInformation(url, browser, calendarName) {
     }
     return events;
 }
-export default getEvents;
+export default getLoftCinemaEvents;

@@ -1,23 +1,16 @@
-function toTitleCase(str) {
-    return str
-        .toLowerCase()
-        .split(" ")
-        .map(function (word) {
-        return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-        .join(" ");
-}
 async function getPageContent(browser, url, waitForSelector) {
     try {
         // Create a new page (tab) in the browser
         const page = await browser.newPage();
         await page.goto(encodeURI(url), { waitUntil: "domcontentloaded" });
-        await page
-            .waitForSelector(waitForSelector, {
-            visible: true,
-            timeout: 3000,
-        })
-            .catch(() => { });
+        if (!!waitForSelector) {
+            await page
+                .waitForSelector(waitForSelector, {
+                visible: true,
+                timeout: 3000,
+            })
+                .catch(() => { });
+        }
         const pageContents = await page.content();
         await page.close();
         return pageContents;
@@ -40,5 +33,14 @@ function getDuration(runtime) {
         hours: Math.floor(runtime / 60),
         minutes: runtime % 60,
     };
+}
+function toTitleCase(str) {
+    return str
+        .toLowerCase()
+        .split(" ")
+        .map(function (word) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+        .join(" ");
 }
 export { toTitleCase, getPageContent, getDateArray, getDuration };
