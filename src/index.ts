@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { writeFileSync, mkdir } from "fs";
+import { writeFileSync, mkdirSync } from "fs";
 
 import chromium from "chrome-aws-lambda";
 import ics from "ics";
@@ -62,7 +62,7 @@ async function main() {
 	await ticketmasterVenues.forEach(async (venue) => {
 		const events = await getTicketmasterEvents(venue.venueId, venue.name); // 191 Toole
 
-		mkdir(`calendars/${venue.path}`, { recursive: true }, (err) => {});
+		mkdirSync(`calendars/${venue.path}`, { recursive: true });
 
 		ics.createEvents(events, (error, value) => {
 			if (error) {
