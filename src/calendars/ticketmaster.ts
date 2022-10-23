@@ -8,7 +8,8 @@ dayjs.extend(utc);
 
 const getTicketmasterEvents = async (
 	venueId: string,
-	calendarName: string
+	calendarName: string,
+	attempts: number = 0
 ): Promise<EventAttributes[]> => {
 	const response = await fetch(
 		`https://app.ticketmaster.com/discovery/v2/events.json?venueId=${venueId}&apikey=${process.env.TICKETMASTER_API_KEY}`
@@ -27,6 +28,16 @@ const getTicketmasterEvents = async (
 			};
 		}
 	);
+
+	if (!events && attempts < 5) {
+		console.log(
+			"No events for " +
+				calendarName +
+				". Attempting to fetch events again." +
+				attempts
+		);
+		return getTicketmasterEvents(venueId, calendarName, attempts + 1);
+	}
 
 	return events;
 };
