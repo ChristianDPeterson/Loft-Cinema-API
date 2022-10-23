@@ -23,9 +23,7 @@ const getTicketmasterEvents = async (
 				description: `Get tickets: ${event.url} \nDescription: ${event.info} \n`,
 				url: event.url,
 				duration: getDuration(120),
-				start: getDateArray(
-					dayjs.utc(event.dates.start.dateTime).utcOffset(-7)
-				),
+				start: getDateArray(dayjs.utc(event.dates.start.dateTime)),
 			};
 		}
 	);
