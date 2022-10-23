@@ -62,13 +62,13 @@ async function main() {
 	await ticketmasterVenues.forEach(async (venue) => {
 		const events = await getTicketmasterEvents(venue.venueId, venue.name); // 191 Toole
 
-		mkdir(venue.path, (err) => {});
+		mkdir(`calendars/${venue.path}`, { recursive: true }, (err) => {});
 
 		ics.createEvents(events, (error, value) => {
 			if (error) {
 				console.log(error);
 			}
-			writeFileSync(`${venue.path}/event.ics`, value);
+			writeFileSync(`calendars/${venue.path}/event.ics`, value);
 		});
 	});
 }
