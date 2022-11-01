@@ -39,7 +39,15 @@ const getTicketmasterEvents = async (
 		return getTicketmasterEvents(venueId, calendarName, attempts + 1);
 	}
 
-	return events;
+	let uniqueEvents = events.filter(
+		(value, index, self) =>
+			index ===
+			self.findIndex(
+				(t) => t.title === value.title && t.start === value.start
+			)
+	);
+
+	return uniqueEvents;
 };
 
 export default getTicketmasterEvents;
