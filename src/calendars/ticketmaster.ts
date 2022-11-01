@@ -12,7 +12,7 @@ const getTicketmasterEvents = async (
 	attempts: number = 0
 ): Promise<EventAttributes[]> => {
 	const response = await fetch(
-		`https://app.ticketmaster.com/discovery/v2/events.json?venueId=${venueId}&apikey=${process.env.TICKETMASTER_API_KEY}`
+		`https://app.ticketmaster.com/discovery/v2/events.json?venueId=${venueId}&size=100&apikey=${process.env.TICKETMASTER_API_KEY}`
 	);
 	const data = await response.json();
 
