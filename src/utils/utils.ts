@@ -17,7 +17,7 @@ async function getPageContent(
 			await page
 				.waitForSelector(waitForSelector, {
 					visible: true,
-					timeout: 3000,
+					timeout: 10000,
 				})
 				.catch(() => {});
 		}
