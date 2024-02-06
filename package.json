@@ -1,5 +1,5 @@
 {
-  "name": "loft-cinema-api",
+  "name": "ical-generator",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
@@ -9,11 +9,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChristianUA/Loft-Cinema-API.git"
+    "url": "git+https://github.com/cpetersonco/ical-generator.git"
   },
   "author": "",
   "license": "ISC",
-  "homepage": "https://github.com/ChristianUA/Loft-Cinema-API#readme",
+  "homepage": "https://github.com/cpetersonco/ical-generator#readme",
   "description": "",
   "dependencies": {
     "axios": "^0.26.1",
