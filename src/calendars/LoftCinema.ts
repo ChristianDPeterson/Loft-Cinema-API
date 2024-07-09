@@ -1,15 +1,15 @@
 import {
-	toTitleCase,
-	getPageContent,
 	getDateArray,
 	getDuration,
+	getPageContent,
+	toTitleCase,
 } from "../utils/utils.js";
 
-import type { EventAttributes } from "ics";
 import cheerio from "cheerio";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import utc from "dayjs/plugin/utc.js";
+import type { EventAttributes } from "ics";
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 
@@ -57,7 +57,7 @@ async function getInformation(
 	const $ = cheerio.load(data);
 
 	const title = $(".image-header .container h1").text().trim();
-	const description = $(".film-content p").text().trim();
+	const description = $(".film-content p").text().trim() + "\nGet tickets: " + url;
 
 	const runtimeString = $(".film-extras h4").text().trim();
 	const runtimeHour = parseInt(runtimeString.split(" ")[0]);
